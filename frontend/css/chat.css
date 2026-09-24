@@ -1,0 +1,395 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background: #171126;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+
+
+
+.chat-app {
+    width: 100%;
+    height: 100vh;
+
+    display: flex;
+
+    background: #21183a;
+}
+
+
+
+
+.sidebar {
+    width: 320px;
+    height: 100vh;
+
+    flex-shrink: 0;
+
+    background: #21183a;
+    border-right: 1px solid #3a2f55;
+
+    display: flex;
+    flex-direction: column;
+
+    z-index: 1000;
+}
+
+
+
+
+.sidebar-header {
+    height: 70px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 20px;
+
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+
+    border-bottom: 1px solid #3a2f55;
+}
+
+
+
+
+.search-wrap {
+    padding: 15px;
+}
+
+.search-wrap input {
+    background: #342952;
+    border: none;
+
+    color: white;
+
+    border-radius: 20px;
+
+    padding: 10px 15px;
+}
+
+.search-wrap input:focus {
+    background: #342952;
+    color: white;
+    box-shadow: none;
+}
+
+.search-wrap input::placeholder {
+    color: #aaa;
+}
+
+
+
+
+.chat-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+
+
+
+.chat-main {
+    flex: 1;
+    min-width: 0;
+
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    background: #171126;
+}
+
+
+
+
+.chat-header {
+    height: 70px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 10px 20px;
+
+    background: #2b2048;
+
+    border-bottom: 1px solid #3a2f55;
+
+    color: white;
+}
+
+
+
+.menu-btn {
+    display: none;
+
+    border: none;
+    background: transparent;
+
+    color: white;
+
+    font-size: 24px;
+
+    cursor: pointer;
+}
+
+
+
+
+.avatar {
+    width: 45px;
+    height: 45px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #8b5cf6;
+
+    color: white;
+
+    font-weight: bold;
+}
+
+
+
+
+.name {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+
+/* Status */
+
+.status {
+    font-size: 12px;
+    color: #aaa;
+}
+
+
+
+
+.messages {
+    flex: 1;
+
+    min-height: 0;
+
+    padding: 20px;
+
+    overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+.message {
+    display: flex;
+    width: 100%;
+}
+
+.outgoing {
+    justify-content: flex-end;
+}
+
+.incoming {
+    justify-content: flex-start;
+}
+
+.bubble {
+    max-width: 70%;
+    padding: 10px 14px;
+    border-radius: 15px;
+    color: white;
+    font-size: 14px;
+    word-wrap: break-word;
+}
+
+.outgoing .bubble {
+    background: #7c3aed;
+    border-bottom-right-radius: 4px;
+}
+
+.incoming .bubble {
+    background: #342952;
+    border-bottom-left-radius: 4px;
+}
+
+.time {
+    display: block;
+    text-align: right;
+    margin-top: 5px;
+    font-size: 10px;
+    color: #d0c8e8;
+}
+
+
+
+
+.composer {
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 15px;
+
+    background: #2b2048;
+
+    border-top: 1px solid #3a2f55;
+}
+
+.composer input {
+    flex: 1;
+
+    background: #342952;
+
+    border: none;
+
+    color: white;
+
+    border-radius: 25px;
+
+    padding: 12px 18px;
+}
+
+.composer input:focus {
+    background: #342952;
+    color: white;
+
+    box-shadow: none;
+}
+
+.composer input::placeholder {
+    color: #aaa;
+}
+
+
+
+
+.send-btn {
+    width: 45px;
+    height: 45px;
+
+    flex-shrink: 0;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: #8b5cf6;
+
+    color: white;
+
+    font-size: 20px;
+
+    cursor: pointer;
+}
+
+.send-btn:hover {
+    background: #7c3aed;
+}
+
+
+
+@media (max-width: 768px) {
+
+    .sidebar {
+        position: fixed;
+
+        top: 0;
+        left: 0;
+
+        width: 280px;
+
+        transform: translateX(-100%);
+
+        transition: transform 0.3s ease;
+
+        box-shadow: 5px 0 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .menu-btn {
+        display: block;
+    }
+
+    .chat-header {
+        padding: 10px 15px;
+    }
+
+    .messages {
+        padding: 15px;
+    }
+
+    .composer {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .sidebar {
+        width: 85%;
+    }
+
+    .chat-header {
+        height: 60px;
+    }
+
+    .avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .name {
+        font-size: 15px;
+    }
+
+    .messages {
+        padding: 10px;
+    }
+
+    .composer {
+        padding: 8px;
+        gap: 7px;
+    }
+
+    .composer input {
+        padding: 10px 14px;
+    }
+
+    .send-btn {
+        width: 42px;
+        height: 42px;
+    }
+}

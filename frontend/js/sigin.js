@@ -19,9 +19,14 @@ async function handleSignInForm(event) {
 
         console.log(response.data);
 
-        localStorage.setItem("token", response.data.token);
+        const token = response.data.token;
+        localStorage.setItem("chattoken", token);
 
         alert(response.data.message);
+
+        if (token) {
+            window.location.href = "chat.html";
+        }
 
     } catch (error) {
 
