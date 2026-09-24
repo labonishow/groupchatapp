@@ -5,17 +5,15 @@ const cors = require("cors");
 
 const sequelize = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
-
+const messageRoutes = require("./routes/messageRoutes")
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
 app.use("/api", authRoutes);
+app.use("/api", messageRoutes);
 
-app.get("/", (req, res) => {
-    res.send("Backend is working");
-});
 
 sequelize.sync()
     .then(() => {

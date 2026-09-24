@@ -1,35 +1,81 @@
+const token = localStorage.getItem("chattoken");
+
+if (!token) {
+    window.location.href = "signin.html";
+}
+
+function parseJwt(jwtToken) {
+    try {
+        return JSON.parse(atob(jwtToken.split(".")[1]));
+    } catch (error) {
+        return null;
+    }
+}
+
+const currentUser = parseJwt(token);
+const currentUserId = currentUser ? currentUser.userId : null;
+
+axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
 const messageInput = document.getElementById("msgInput");
-const messages = document.getElementById("messages");
+const messagesEl = document.getElementById("messages");
 
-function getCurrentTime() {
-    const now = new Date();
-
-    return now.toLocaleTimeString([], {
+function formatTime(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleTimeString([], {
         hour: "2-digit",
-        minute: "2-digit"
+        minute: "2-digit",
     });
 }
 
-function sendMessage() {
+function renderMessage(msg) {
+    const senderId = msg.User ? msg.User.id : msg.senderId;
+    const isOwn = senderId === currentUserId;
+
+    const message = document.createElement("div");
+    message.className = "message " + (isOwn ? "outgoing" : "incoming");
+
+    const senderName = msg.User ? msg.User.name : "";
+
+    message.innerHTML = `
+        <div class="bubble">
+            ${!isOwn ? `<div style="font-size:11px;color:#c9b8f5;margin-bottom:3px;">${senderName}</div>` : ""}
+            ${msg.text}
+            <span class="time">${formatTime(msg.createdAt)}</span>
+        </div>
+    `;
+
+    messagesEl.appendChild(message);
+}
+
+async function loadMessages() {
+    try {
+        const response = await axios.get("http://localhost:5000/api/messages");
+
+        response.data.forEach(renderMessage);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+async function sendMessage() {
     const text = messageInput.value.trim();
 
     if (!text) {
         return;
     }
 
-    const message = document.createElement("div");
+    try {
+        const response = await axios.post("http://localhost:5000/api/messages", { text });
 
-    message.className = "message outgoing";
-
-    message.innerHTML = `
-        <div class="bubble">
-            ${text}
-            <span class="time">${getCurrentTime()}</span>
-        </div>
-    `;
-
-    messages.appendChild(message);
-
-    messageInput.value = "";
-    messages.scrollTop = messages.scrollHeight;
+        renderMessage(response.data);
+        messageInput.value = "";
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    } catch (error) {
+        console.error(error);
+        alert("Could not send message");
+    }
 }
+
+loadMessages();

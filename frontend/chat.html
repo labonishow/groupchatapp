@@ -1,94 +1,67 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Chat</title>
     <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
-    <link rel="stylesheet" href="./css/chat.css">
-</head>
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/chat.css" />
+  </head>
 
-<body>
-
+  <body>
     <div class="chat-app">
-        <div class="sidebar" id="sidebar">
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">Chats</div>
 
-            <div class="sidebar-header">
-                Chats
-            </div>
-
-            <div class="search-wrap">
-                <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Search..."
-                >
-            </div>
-
-            <div class="chat-list" id="chatList"></div>
-
-        </div>
-        <div class="chat-main">
-            <div class="chat-header">
-
-                <button
-                    class="menu-btn"
-                    onclick="document.getElementById('sidebar').classList.toggle('open')"
-                >
-                    ☰
-                </button>
-
-                <div class="avatar" id="headerAvatar">
-                    G
-                </div>
-
-                <div>
-                    <div class="name" id="headerName">
-                        Group Chat
-                    </div>
-
-                    <div class="status">
-                        online
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="messages" id="messages"></div>
-
-
-            
-            <div class="composer">
-
-                <input
-                    type="text"
-                    id="msgInput"
-                    class="form-control"
-                    placeholder="Type a message"
-                    onkeydown="if(event.key === 'Enter') sendMessage()"
-                >
-
-                <button
-                    class="send-btn"
-                    onclick="sendMessage()"
-                >
-                    ➤
-                </button>
-
-            </div>
-
+        <div class="search-wrap">
+          <input type="text" class="form-control" placeholder="Search..." />
         </div>
 
+        <div class="chat-list" id="chatList"></div>
+      </div>
+      <div class="chat-main">
+        <div class="chat-header">
+          <button
+            class="menu-btn"
+            onclick="
+              document.getElementById('sidebar').classList.toggle('open')
+            "
+          >
+            ☰
+          </button>
+
+          <div class="avatar" id="headerAvatar">G</div>
+
+          <div>
+            <div class="name" id="headerName">Group Chat</div>
+
+            <div class="status">online</div>
+          </div>
+        </div>
+
+        <div class="messages" id="messages"></div>
+
+        <div class="composer">
+          <input
+            type="text"
+            id="msgInput"
+            class="form-control"
+            placeholder="Type a message"
+            onkeydown="if (event.key === 'Enter') sendMessage();"
+          />
+
+          <button class="send-btn" onclick="sendMessage()">➤</button>
+        </div>
+      </div>
     </div>
 
-
+    <script src="
+https://cdn.jsdelivr.net/npm/axios@1.20.0/dist/axios.min.js
+"></script>
     <script src="./js/chat.js"></script>
-
-</body>
-
+  </body>
 </html>
