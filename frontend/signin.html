@@ -1,0 +1,64 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Sign In</title>
+
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="./css/singnin.css" />
+  </head>
+
+  <body>
+    <div class="phone-shell">
+      <h1 class="title">Sign In</h1>
+
+      <p class="subtitle">
+        <strong>Welcome Back</strong>
+        Login to your account
+      </p>
+
+      <form onsubmit="handleSignInForm(event)">
+        <label class="field-label"> Email </label>
+
+        <div class="field-wrap">
+          <input
+            type="text"
+            name="email"
+            id="email"
+            class="form-control pill"
+            placeholder="Enter the Email Address"
+            required
+          />
+        </div>
+
+        <label class="field-label"> Password </label>
+
+        <div class="field-wrap">
+          <input
+            type="password"
+            name="password"
+            id="password"
+            class="form-control pill"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn-gradient">Sign In</button>
+      </form>
+
+      <p class="switch-text">
+        Don't have an account?
+        <a href="signup.html">Sign Up</a>
+      </p>
+    </div>
+    <script src="./js/sigin.js"></script>
+  </body>
+</html>

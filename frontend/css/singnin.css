@@ -1,0 +1,154 @@
+ :root {
+        --bg: #0d0715;
+        --panel: #171021;
+        --field: #241c33;
+        --field-border: #3a2f4d;
+        --text: #f5f3f8;
+        --muted: #9a92ab;
+        --accent1: #ff3fb0;
+        --accent2: #7b3ffb;
+        --accent3: #4d6bff;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        background: radial-gradient(
+            circle at 20% 10%,
+            #2a1140 0%,
+            var(--bg) 55%
+        );
+
+        min-height: 100vh;
+        color: var(--text);
+        font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 32px 16px;
+    }
+
+    .phone-shell {
+        width: 100%;
+        max-width: 380px;
+
+        background: linear-gradient(
+            180deg,
+            var(--panel) 0%,
+            #0f0a18 100%
+        );
+
+        border-radius: 36px;
+        padding: 28px 24px 32px;
+
+        border: 1px solid rgba(255,255,255,.06);
+
+        box-shadow:
+            0 30px 80px rgba(0,0,0,.55),
+            inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    h1.title {
+        font-size: 1.7rem;
+        font-weight: 700;
+        text-align: center;
+        margin: 8px 0 2px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: var(--muted);
+        font-size: .92rem;
+        margin-bottom: 26px;
+    }
+
+    .subtitle strong {
+        display: block;
+        color: var(--text);
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 2px;
+    }
+
+    .field-label {
+        font-size: .82rem;
+        color: var(--muted);
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .field-wrap {
+        position: relative;
+        margin-bottom: 18px;
+    }
+
+    .form-control.pill {
+        background: var(--field);
+        border: 1px solid var(--field-border);
+        color: var(--text);
+
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-size: .92rem;
+    }
+
+    .form-control.pill::placeholder {
+        color: #6f6684;
+    }
+
+    .form-control.pill:focus {
+        background: var(--field);
+        color: var(--text);
+        border-color: var(--accent2);
+
+        box-shadow: 0 0 0 3px rgba(123,63,251,.25);
+    }
+
+    .btn-gradient {
+        width: 100%;
+        border: none;
+        border-radius: 14px;
+
+        padding: 13px;
+
+        font-weight: 600;
+        font-size: 1rem;
+        color: #fff;
+
+        background: linear-gradient(
+            90deg,
+            var(--accent1),
+            var(--accent2) 55%,
+            var(--accent3)
+        );
+
+        box-shadow: 0 10px 25px rgba(123,63,251,.35);
+    }
+
+    .switch-text {
+        text-align: center;
+        font-size: .85rem;
+        color: var(--muted);
+        margin-top: 22px;
+    }
+
+    .switch-text a {
+        color: #c58bff;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    @media (max-width:400px) {
+        .phone-shell {
+            padding: 22px 18px 26px;
+            border-radius: 28px;
+        }
+
+        h1.title {
+            font-size: 1.45rem;
+        }
+    }

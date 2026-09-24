@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Sign Up</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="./css/singup.css" />
+  </head>
+
+  <body>
+    <div class="phone-shell">
+      <h1 class="title">Sign Up</h1>
+
+      <p class="subtitle">
+        <strong>Create Your Account</strong>
+        Join us and get started
+      </p>
+
+      <form onsubmit="handleSignUpForm(event)">
+        <label class="field-label">Name</label>
+
+        <div class="field-wrap">
+          <input
+            type="text"
+            name="name"
+            id="name"
+            class="form-control pill"
+            placeholder="Enter your name"
+            required
+          />
+        </div>
+
+        <label class="field-label">Email Address</label>
+
+        <div class="field-wrap">
+          <input
+            type="email"
+            name="email"
+            id="email"
+            class="form-control pill"
+            placeholder="Example@gmail.com"
+            required
+          />
+        </div>
+        <label class="field-label">Phone Number</label>
+
+        <div class="field-wrap">
+          <input
+            type="tel"
+            name="phone"
+            id="phone"
+            class="form-control pill"
+            placeholder="Enter your phone number"
+            required
+          />
+        </div>
+        <label class="field-label">Password</label>
+
+        <div class="field-wrap">
+          <input
+            type="password"
+            name="password"
+            id="password"
+            class="form-control pill"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+        <button type="submit" class="btn-gradient">Sign Up</button>
+      </form>
+
+      <p class="switch-text">
+        Already have an account?
+        <a href="signin.html">Sign In</a>
+      </p>
+    </div>
+    <script src="./js/signup.js"></script>
+  </body>
+</html>
