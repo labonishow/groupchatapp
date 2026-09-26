@@ -5,7 +5,7 @@ const User = require("../models/User");
 const sendMessage = async (req, res) => {
     try {
         const { text } = req.body;
-        const senderId = req.userId; // set by authMiddleware from the verified token
+        const senderId = req.userId; 
 
         if (!text) {
             return res.status(400).json({
@@ -45,15 +45,12 @@ const getMessages = async (req, res) => {
 
 
 const createMessageFromSocket = async ({ token, text }) => {
-    if (!text) {
-        throw new Error("Message text is required");
-    }
+    if (!text) throw new Error("Message text is required");
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const senderId = decoded.userId;
 
     const message = await Message.create({ text, senderId });
-
     const messageWithSender = await Message.findByPk(message.id, {
         include: { model: User, attributes: ["id", "name"] },
     });

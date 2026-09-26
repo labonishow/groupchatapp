@@ -3,41 +3,29 @@ require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
-const WebSocket = require("ws");
+const { Server } = require('socket.io');
 
 const sequelize = require("./config/db");
 const { createMessageFromSocket } = require("./controllers/messageController");
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
-
-let sockets = [];
-
-wss.on("connection", (ws) => {
-    sockets.push(ws);
-
-    ws.on("message", async (raw) => {
-        try {
-            const { token, text } = JSON.parse(raw);
-
-            const messageWithSender = await createMessageFromSocket({ token, text });
-            const payload = JSON.stringify(messageWithSender);
-
-            sockets.forEach((s) => {
-                if (s.readyState === WebSocket.OPEN) {
-                    s.send(payload);
-                }
-            });
-        } catch (error) {
-            console.error("WebSocket message error:", error.message);
-        }
-    });
-
-    ws.on("close", () => {
-        sockets = sockets.filter((s) => s !== ws);
-    });
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+    },
 });
+io.on("connection",(socket)=>{
+    socket.on("chatMessage",async({token,text})=>{
+        try {
+            const messageWithSender = await createMessageFromSocket({token,text});
+            io.emit("chatMessage",messageWithSender);
+           // console.log("Connected to server:", socket.id);
+        } catch (error) {
+            console.error("socket message error:",error.message);
+        }
+    })
+})
 
 const authRoutes = require("./routes/authRoutes");
 const messageRoutes = require("./routes/messageRoutes");

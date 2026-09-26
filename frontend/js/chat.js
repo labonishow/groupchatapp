@@ -60,21 +60,17 @@ async function loadMessages() {
     }
 }
 
-const socket = new WebSocket("ws://localhost:5000");
-
-socket.onmessage = (event) => {
-    const msg = JSON.parse(event.data);
+const socket = io("http://localhost:5000");
+socket.on("chatMessage",(msg)=>{
     renderMessage(msg);
-};
+});
 
-function sendMessage() {
+function sendMessage(){
     const text = messageInput.value.trim();
-
-    if (!text) {
+    if(!text){
         return;
     }
-
-    socket.send(JSON.stringify({ token, text }));
+    socket.emit("chatMessage",{token,text});
     messageInput.value = "";
 }
 
