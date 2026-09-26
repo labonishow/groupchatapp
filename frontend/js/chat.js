@@ -46,6 +46,7 @@ function renderMessage(msg) {
     `;
 
     messagesEl.appendChild(message);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
 async function loadMessages() {
@@ -59,23 +60,22 @@ async function loadMessages() {
     }
 }
 
-async function sendMessage() {
+const socket = new WebSocket("ws://localhost:5000");
+
+socket.onmessage = (event) => {
+    const msg = JSON.parse(event.data);
+    renderMessage(msg);
+};
+
+function sendMessage() {
     const text = messageInput.value.trim();
 
     if (!text) {
         return;
     }
 
-    try {
-        const response = await axios.post("http://localhost:5000/api/messages", { text });
-
-        renderMessage(response.data);
-        messageInput.value = "";
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-    } catch (error) {
-        console.error(error);
-        alert("Could not send message");
-    }
+    socket.send(JSON.stringify({ token, text }));
+    messageInput.value = "";
 }
 
 loadMessages();
