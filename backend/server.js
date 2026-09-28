@@ -12,15 +12,19 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "*",
+        origin:
+            process.env.NODE_ENV === "production"
+                ? false
+                : ["http://127.0.0.1:5500", "http://localhost:5000"],
     },
 });
 io.on("connection",(socket)=>{
     socket.on("chatMessage",async({token,text})=>{
         try {
             const messageWithSender = await createMessageFromSocket({token,text});
+            console.log("Connected to server:", socket.id, messageWithSender.User.name, "said:",text);
             io.emit("chatMessage",messageWithSender);
-           // console.log("Connected to server:", socket.id);
+           
         } catch (error) {
             console.error("socket message error:",error.message);
         }
