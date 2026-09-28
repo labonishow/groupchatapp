@@ -9,7 +9,7 @@ module.exports = (socket, io) => {
 
             console.log(socket.user.name, "said", message);
 
-            io.emit("new-message", message);
+            io.to(roomName).emit("new-message", message);
        
     });
 };

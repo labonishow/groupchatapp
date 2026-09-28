@@ -20,6 +20,7 @@ const messagesEl = document.getElementById("messages");
 
 function formatTime(dateStr) {
     const d = new Date(dateStr);
+
     return d.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -30,13 +31,25 @@ function renderMessage(msg) {
     const isOwn = msg.senderId === currentUserId;
 
     const message = document.createElement("div");
-    message.className = "message " + (isOwn ? "outgoing" : "incoming");
+
+    message.className =
+        "message " + (isOwn ? "outgoing" : "incoming");
 
     message.innerHTML = `
         <div class="bubble">
-            ${!isOwn ? `<div style="font-size:11px;color:#c9b8f5;margin-bottom:3px;">${msg.User.name}</div>` : ""}
+            ${
+                !isOwn
+                    ? `<div style="font-size:11px;color:#c9b8f5;margin-bottom:3px;">
+                        ${msg.User.name}
+                       </div>`
+                    : ""
+            }
+
             ${msg.text}
-            <span class="time">${formatTime(msg.createdAt)}</span>
+
+            <span class="time">
+                ${formatTime(msg.createdAt)}
+            </span>
         </div>
     `;
 
@@ -44,25 +57,61 @@ function renderMessage(msg) {
     messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
+
 const socket = io("http://localhost:5000", {
-    auth: { token },
+    auth: {
+        token: token
+    }
 });
+
 
 socket.on("connect_error", (error) => {
     console.log("Connection failed:", error.message);
 });
 
-socket.on("chatMessage", (msg) => {
+
+socket.on("new-message", (msg) => {
     renderMessage(msg);
 });
 
+
 function sendMessage() {
+
     const text = messageInput.value.trim();
 
     if (!text) {
         return;
     }
 
-    socket.emit("chatMessage", { text });
+    if (!window.roomName) {
+        alert("Please select a user first");
+        return;
+    }
+
+    socket.emit("new-message", {
+        text: text,
+        roomName: window.roomName
+    });
+
     messageInput.value = "";
+}
+
+
+async function search(event) {
+
+    if (event.key !== "Enter") {
+        return;
+    }
+
+    event.preventDefault();
+
+    const myEmail = localStorage.getItem("email");
+     const roomName = [myEmail]
+    
+
+    window.roomName = roomName;
+
+    socket.emit("join-room", roomName);
+
+    alert("Room we joined: " + roomName);
 }

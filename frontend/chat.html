@@ -18,8 +18,15 @@
         <div class="sidebar-header">Chats</div>
 
         <div class="search-wrap">
-          <input type="text" class="form-control" placeholder="Search..." />
-        </div>
+    <input
+        type="email"
+        name="emailInput"
+        id="emailInput"
+        class="form-control"
+        placeholder="Enter user's email"
+        onkeydown="search(event)"
+    >
+    </div>
 
         <div class="chat-list" id="chatList"></div>
       </div>
