@@ -1,14 +1,15 @@
 const { createMessage } = require("../../controllers/messageController");
 
 module.exports = (socket, io) => {
-    console.log(socket.user.name, "connected");
-
-    socket.on("chatMessage", ({ text }) => {
+  socket.on("join-room",(roomName)=>{
+      socket.join(roomName);
+  })
+    socket.on("new-message", ({ text,roomName }) => {
             const message = createMessage({ user: socket.user, text });
 
             console.log(socket.user.name, "said", message);
 
-            io.emit("chatMessage", message);
+            io.emit("new-message", message);
        
     });
 };
