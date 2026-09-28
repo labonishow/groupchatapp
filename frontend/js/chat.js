@@ -15,8 +15,6 @@ function parseJwt(jwtToken) {
 const currentUser = parseJwt(token);
 const currentUserId = currentUser ? currentUser.userId : null;
 
-axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
 const messageInput = document.getElementById("msgInput");
 const messagesEl = document.getElementById("messages");
 
@@ -29,17 +27,14 @@ function formatTime(dateStr) {
 }
 
 function renderMessage(msg) {
-    const senderId = msg.User ? msg.User.id : msg.senderId;
-    const isOwn = senderId === currentUserId;
+    const isOwn = msg.senderId === currentUserId;
 
     const message = document.createElement("div");
     message.className = "message " + (isOwn ? "outgoing" : "incoming");
 
-    const senderName = msg.User ? msg.User.name : "";
-
     message.innerHTML = `
         <div class="bubble">
-            ${!isOwn ? `<div style="font-size:11px;color:#c9b8f5;margin-bottom:3px;">${senderName}</div>` : ""}
+            ${!isOwn ? `<div style="font-size:11px;color:#c9b8f5;margin-bottom:3px;">${msg.User.name}</div>` : ""}
             ${msg.text}
             <span class="time">${formatTime(msg.createdAt)}</span>
         </div>
@@ -49,29 +44,25 @@ function renderMessage(msg) {
     messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-async function loadMessages() {
-    try {
-        const response = await axios.get("http://localhost:5000/api/messages");
+const socket = io("http://localhost:5000", {
+    auth: { token },
+});
 
-        response.data.forEach(renderMessage);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-    } catch (error) {
-        console.error(error);
-    }
-}
+socket.on("connect_error", (error) => {
+    console.log("Connection failed:", error.message);
+});
 
-const socket = io("http://localhost:5000");
-socket.on("chatMessage",(msg)=>{
+socket.on("chatMessage", (msg) => {
     renderMessage(msg);
 });
 
-function sendMessage(){
+function sendMessage() {
     const text = messageInput.value.trim();
-    if(!text){
+
+    if (!text) {
         return;
     }
-    socket.emit("chatMessage",{token,text});
+
+    socket.emit("chatMessage", { text });
     messageInput.value = "";
 }
-
-loadMessages();
