@@ -1,6 +1,7 @@
 const token = localStorage.getItem("chattoken");
+const myEmail = localStorage.getItem("email");
 
-if (!token) {
+if (!token || !myEmail) {
     window.location.href = "signin.html";
 }
 
@@ -17,10 +18,22 @@ const currentUserId = currentUser ? currentUser.userId : null;
 
 const messageInput = document.getElementById("msgInput");
 const messagesEl = document.getElementById("messages");
+const chatListEl = document.getElementById("chatList");
+
+let roomName = null;
+
+axios.defaults.headers.common["Authorization"] = "Bearer " + token;
+
+const socket = io("http://localhost:5000", {
+    auth: { token: token },
+});
+
+socket.on("connect_error", (error) => {
+    console.log("Connection failed:", error.message);
+});
 
 function formatTime(dateStr) {
     const d = new Date(dateStr);
-
     return d.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -30,88 +43,117 @@ function formatTime(dateStr) {
 function renderMessage(msg) {
     const isOwn = msg.senderId === currentUserId;
 
+    let senderName = "";
+
+    if (msg.User) {
+        senderName = msg.User.name;
+    }
+
     const message = document.createElement("div");
 
-    message.className =
-        "message " + (isOwn ? "outgoing" : "incoming");
+    if (isOwn) {
+        message.className = "message outgoing";
+    } else {
+        message.className = "message incoming";
+    }
 
-    message.innerHTML = `
-        <div class="bubble">
-            ${
-                !isOwn
-                    ? `<div style="font-size:11px;color:#c9b8f5;margin-bottom:3px;">
-                        ${msg.User.name}
-                       </div>`
-                    : ""
-            }
+    let nameHtml =
+        '<div style="font-size:11px;color:#c9b8f5;margin-bottom:3px;">' +
+        senderName +
+        '</div>';
 
-            ${msg.text}
-
-            <span class="time">
-                ${formatTime(msg.createdAt)}
-            </span>
-        </div>
-    `;
+    message.innerHTML =
+        '<div class="bubble">' +
+        nameHtml +
+        msg.text +
+        '<span class="time">' +
+        formatTime(msg.createdAt) +
+        '</span>' +
+        '</div>';
 
     messagesEl.appendChild(message);
     messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-
-const socket = io("http://localhost:5000", {
-    auth: {
-        token: token
-    }
-});
-
-
-socket.on("connect_error", (error) => {
-    console.log("Connection failed:", error.message);
-});
-
-
-socket.on("new-message", (msg) => {
+socket.on("chatMessage", function (msg) {
     renderMessage(msg);
 });
 
+socket.on("new-message", function (msg) {
+    renderMessage(msg);
+});
 
 function sendMessage() {
-
     const text = messageInput.value.trim();
 
     if (!text) {
         return;
     }
 
-    if (!window.roomName) {
-        alert("Please select a user first");
-        return;
+    if (roomName === null) {
+        socket.emit("chatMessage", { text: text });
+    } else {
+        socket.emit("new-message", { text: text, roomName: roomName });
     }
-
-    socket.emit("new-message", {
-        text: text,
-        roomName: window.roomName
-    });
 
     messageInput.value = "";
 }
 
+function getRoomId(emailA, emailB) {
+    const emails = [emailA.toLowerCase(), emailB.toLowerCase()];
+    emails.sort();
+    return emails[0] + "_" + emails[1];
+}
 
-async function search(event) {
+function openChat(user) {
+    roomName = getRoomId(myEmail, user.email);
 
-    if (event.key !== "Enter") {
-        return;
+    messagesEl.innerHTML = "";
+    document.getElementById("headerName").innerText = user.name;
+    document.getElementById("headerAvatar").innerText = user.name.charAt(0).toUpperCase();
+
+    const allItems = document.querySelectorAll(".chat-item");
+    for (let i = 0; i < allItems.length; i++) {
+        allItems[i].classList.remove("active");
     }
 
-    event.preventDefault();
-
-    const myEmail = localStorage.getItem("email");
-     const roomName = [myEmail]
-    
-
-    window.roomName = roomName;
+    const selectedItem = document.getElementById("user-" + user.id);
+    if (selectedItem) {
+        selectedItem.classList.add("active");
+    }
 
     socket.emit("join-room", roomName);
-
-    alert("Room we joined: " + roomName);
 }
+
+function loadUsers() {
+    axios.get("http://localhost:5000/api/users")
+        .then(function (response) {
+            const users = response.data;
+
+            chatListEl.innerHTML = "";
+
+            for (let i = 0; i < users.length; i++) {
+                const user = users[i];
+
+                const item = document.createElement("div");
+                item.className = "chat-item";
+                item.id = "user-" + user.id;
+
+               item.innerHTML =
+    '<div class="user-rectangle">' +
+        user.name +
+    '</div>';
+
+                item.onclick = function () {
+                    openChat(user);
+                };
+
+                chatListEl.appendChild(item);
+            }
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+}
+
+loadUsers();

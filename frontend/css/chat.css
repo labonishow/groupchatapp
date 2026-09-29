@@ -247,6 +247,20 @@ body {
     color: #d0c8e8;
 }
 
+.user-rectangle {
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    background-color: #21183a;
+    color: white;
+    cursor: pointer;
+    border: 1px solid #4b3a70;
+}
+
+.user-rectangle:hover {
+    background-color: #302151;
+}
+
 
 
 

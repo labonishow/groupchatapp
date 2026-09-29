@@ -21,7 +21,7 @@ async function handleSignInForm(event) {
 
         const token = response.data.token;
         localStorage.setItem("chattoken", token);
-
+        localStorage.setItem("email", email);
         alert(response.data.message);
 
         if (token) {
