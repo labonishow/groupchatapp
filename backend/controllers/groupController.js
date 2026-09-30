@@ -31,6 +31,7 @@ const createGroup = async (req, res) => {
 const addMember = async (req, res) => {
     try {
         const { userId } = req.body;
+
         const group = await Group.findByPk(req.params.id);
 
         if (!group) {
@@ -47,19 +48,113 @@ const addMember = async (req, res) => {
             });
         }
 
+        const user = await User.findByPk(userId);
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+            });
+        }
+
+        const alreadyMember = await group.hasMember(userId);
+
+        if (alreadyMember) {
+            return res.status(400).json({
+                message: "User is already a member",
+            });
+        }
+
         await group.addMember(userId);
+
+        // Get Socket.IO
+        const io = req.app.get("io");
+
+        // Tell everyone in the group
+        io.to("group_" + group.id).emit("system-message", {
+            groupId: group.id,
+            text: user.name + " was added to the group"
+        });
 
         res.status(200).json({
             message: "Member added",
         });
+
     } catch (error) {
         console.error(error);
+
         res.status(500).json({
             message: "Server error",
         });
     }
 };
 
+const leaveGroup = async (req, res) => {
+    try {
+        const groupId = req.params.id;
+        const userId = req.userId;;
+
+        console.log("GROUP ID:", groupId);
+        console.log("USER ID:", userId);
+
+        const group = await Group.findByPk(groupId);
+
+        console.log("GROUP:", group);
+
+        if (!group) {
+            return res.status(404).json({
+                message: "Group not found"
+            });
+        }
+
+        const isMember = await group.hasMember(userId);
+
+        console.log("IS MEMBER:", isMember);
+
+        if (!isMember) {
+            return res.status(400).json({
+                message: "You are not a member of this group"
+            });
+        }
+
+        const user = await User.findByPk(userId);
+
+        console.log("USER:", user);
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        console.log("Removing user from group...");
+
+        await group.removeMember(userId);
+
+        console.log("User removed successfully");
+
+        const io = req.app.get("io");
+
+        if (io) {
+            io.to("group_" + group.id).emit("system-message", {
+                groupId: group.id,
+                text: user.name + " left the group"
+            });
+        }
+
+        res.status(200).json({
+            message: "You left the group"
+        });
+
+    } catch (error) {
+
+        console.error("LEAVE GROUP ERROR:", error);
+
+        res.status(500).json({
+            message: "Server error",
+            error: error.message
+        });
+    }
+};
 const getMyGroups = async (req, res) => {
     try {
         const user = await User.findByPk(req.userId, {
@@ -112,9 +207,12 @@ const getGroupMessages = async (req, res) => {
     }
 };
 
+
+
 module.exports = {
     createGroup,
     addMember,
     getMyGroups,
     getGroupMessages,
+    leaveGroup
 };

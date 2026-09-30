@@ -6,7 +6,19 @@ const Group = require("./Group");
 const GroupMessage = sequelize.define("GroupMessage", {
     text: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
+    },
+    mediaUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    mediaType: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    fileName: {
+        type: DataTypes.STRING,
+        allowNull: true,
     },
 });
 

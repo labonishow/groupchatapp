@@ -139,23 +139,52 @@ function renderMessage(msg) {
             '</div>';
 
     }
+    let contentHtml = "";
 
+if (msg.mediaUrl) {
 
-    message.innerHTML =
+    if (msg.mediaType && msg.mediaType.startsWith("image/")) {
 
-        '<div class="bubble">' +
+        contentHtml =
+            '<img src="' +
+            msg.mediaUrl +
+            '" class="chat-image">';
 
-        nameHtml +
+    } else {
 
-        '<div>' +
+        contentHtml =
+            '<a href="' +
+            msg.mediaUrl +
+            '" target="_blank">' +
+            "📎 " +
+            msg.fileName +
+            "</a>";
+
+    }
+
+} else {
+
+    contentHtml =
+        "<div>" +
         msg.text +
-        '</div>' +
+        "</div>";
 
-        '<span class="time">' +
-        formatTime(msg.createdAt) +
-        '</span>' +
+}
 
-        '</div>';
+
+   message.innerHTML =
+
+    '<div class="bubble">' +
+
+    nameHtml +
+
+    contentHtml +
+
+    '<span class="time">' +
+    formatTime(msg.createdAt) +
+    '</span>' +
+
+    '</div>';
 
 
     messagesEl.appendChild(message);
@@ -181,11 +210,8 @@ socket.on(
     }
 );
 
-
-// =========================
 // GROUP MESSAGE RECEIVED
 // (matches what the backend actually emits: "group-message")
-// =========================
 
 socket.on(
     "group-message",
@@ -199,6 +225,27 @@ socket.on(
 
     }
 );
+
+socket.on("system-message", function (msg) {
+
+    if (
+        currentGroup &&
+        String(currentGroup.id) === String(msg.groupId)
+    ) {
+
+        const message = document.createElement("div");
+
+        message.className = "system-message";
+
+        message.innerText = msg.text;
+
+        messagesEl.appendChild(message);
+
+        messagesEl.scrollTop =
+            messagesEl.scrollHeight;
+    }
+
+});
 
 // PRIVATE ROOM ID
 function getRoomId(emailA, emailB) {
@@ -243,7 +290,8 @@ function openChat(user) {
     document.getElementById("headerAvatar").innerText =
         user.name.charAt(0).toUpperCase();
 
-    document.getElementById("addMemberBtn").style.display = "none";
+   document.getElementById("addMemberBtn").style.display = "none";
+   document.getElementById("leaveGroupBtn").style.display = "none";
 
     clearActiveItems();
 
@@ -297,7 +345,8 @@ function openGroupChat(group) {
     document.getElementById("headerAvatar").innerText =
         group.name.charAt(0).toUpperCase();
 
-    document.getElementById("addMemberBtn").style.display = "inline-block";
+   document.getElementById("addMemberBtn").style.display = "inline-block";
+   document.getElementById("leaveGroupBtn").style.display = "inline-block";
 
     clearActiveItems();
 
@@ -384,11 +433,7 @@ function loadGroups() {
 
 }
 
-
-// =========================
 // CREATE GROUP (select members first)
-// =========================
-
 function toggleSelectionMode() {
 
     selectionMode = !selectionMode;
@@ -452,6 +497,8 @@ function confirmCreateGroup() {
         });
 
 }
+
+
 // ADD A USER TO THE OPEN GROUP
 
 function addMemberPrompt() {
@@ -488,6 +535,66 @@ function addMemberPrompt() {
 
         });
 
+}
+
+function leaveCurrentGroup() {
+
+    if (!currentGroup) {
+        return;
+    }
+
+    const groupId = currentGroup.id;
+
+    if (!confirm("Are you sure you want to leave this group?")) {
+        return;
+    }
+
+    axios.post(
+        "http://localhost:5000/api/groups/" +
+        groupId +
+        "/leave"
+    )
+    .then(function () {
+
+        // Leave Socket.IO room
+        socket.emit("leave-group", groupId);
+
+        // Clear current group
+        currentGroup = null;
+        roomName = null;
+
+        // Clear messages
+        messagesEl.innerHTML = "";
+
+        // Reset header
+        document.getElementById("headerName").innerText =
+            "Select a chat";
+
+        document.getElementById("headerAvatar").innerText =
+            "G";
+
+        // Hide group buttons
+        document.getElementById("addMemberBtn").style.display =
+            "none";
+
+        document.getElementById("leaveGroupBtn").style.display =
+            "none";
+
+        // Reload groups
+        loadGroups();
+
+    })
+    .catch(function (error) {
+
+        console.error("Leave group error:", error);
+
+        alert(
+            error.response
+                ? error.response.data.message
+                : "Could not leave group"
+        );
+
+    });
 }
 // SEND MESSAGE
 function sendMessage() {
@@ -533,6 +640,78 @@ messageInput.addEventListener(
 
     }
 );
+
+const fileInput = document.getElementById("fileInput");
+async function uploadFile() {
+
+    const file = fileInput.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    try {
+
+        const response = await axios.post(
+            "http://localhost:5000/api/upload",
+            formData
+        );
+
+        console.log("File uploaded:", response.data);
+
+        sendMediaMessage(
+            response.data.url,
+            response.data.type,
+            response.data.name
+        );
+
+    } catch (error) {
+
+        console.error("Upload failed:", error);
+
+        alert("File upload failed");
+
+    }
+
+    fileInput.value = "";
+}
+function sendMediaMessage(mediaUrl, mediaType, fileName) {
+
+    if (currentGroup) {
+
+        socket.emit("group-message", {
+
+            groupId: currentGroup.id,
+
+            mediaUrl: mediaUrl,
+
+            mediaType: mediaType,
+
+            fileName: fileName
+
+        });
+
+    } else if (roomName) {
+
+        socket.emit("new-message", {
+
+            roomName: roomName,
+
+            mediaUrl: mediaUrl,
+
+            mediaType: mediaType,
+
+            fileName: fileName
+
+        });
+
+    }
+
+}
 // RENDER USER LIST
 function renderUserList() {
 

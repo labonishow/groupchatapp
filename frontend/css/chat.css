@@ -426,3 +426,10 @@ body {
 .group-chat-item.active {
     background: #4b3575;
 }
+
+.chat-image {
+    max-width: 250px;
+    max-height: 250px;
+    border-radius: 10px;
+    display: block;
+}

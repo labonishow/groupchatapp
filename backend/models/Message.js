@@ -5,10 +5,25 @@ const User = require("./User");
 const Message = sequelize.define("Message", {
     text: {
         type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    mediaUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    mediaType: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    fileName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    roomName: {
+        type: DataTypes.STRING,
         allowNull: false,
     },
 });
-
 
 User.hasMany(Message, { foreignKey: "senderId" });
 Message.belongsTo(User, { foreignKey: "senderId" });
