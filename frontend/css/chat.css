@@ -407,3 +407,22 @@ body {
         height: 42px;
     }
 }
+
+
+.group-chat-item {
+    padding: 12px 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #302151;
+    color: white;
+    cursor: pointer;
+    border: 1px solid #4b3a70;
+}
+
+.group-chat-item:hover {
+    background: #3b2860;
+}
+
+.group-chat-item.active {
+    background: #4b3575;
+}

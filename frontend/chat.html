@@ -17,19 +17,26 @@
       <div class="sidebar" id="sidebar">
         <div class="sidebar-header">Chats</div>
 
-        <div class="search-wrap">
-    <input
-        type="email"
-        name="emailInput"
-        id="emailInput"
-        class="form-control"
-        placeholder="Enter user's email"
-        onkeydown="search(event)"
-    >
-    </div>
-    
+        <button onclick="toggleSelectionMode()" class="btn btn-sm btn-outline-light m-2">
+          + New Group
+        </button>
+
+        <div id="groupCreateControls" style="display:none; padding:0 12px;">
+          <input
+            type="text"
+            id="newGroupName"
+            class="form-control form-control-sm mb-2"
+            placeholder="Group name"
+          />
+          <button onclick="confirmCreateGroup()" class="btn btn-sm btn-primary w-100 mb-2">
+            Create Group
+          </button>
+        </div>
 
         <div class="chat-list" id="chatList"></div>
+
+        <div class="sidebar-header">Groups</div>
+        <div class="chat-list" id="groupList"></div>
       </div>
       <div class="chat-main">
         <div class="chat-header">
@@ -44,11 +51,20 @@
 
           <div class="avatar" id="headerAvatar">G</div>
 
-          <div>
-            <div class="name" id="headerName">Group Chat</div>
+          <div class="flex-grow-1">
+            <div class="name" id="headerName">Select a chat</div>
 
             <div class="status">online</div>
           </div>
+
+          <button
+            id="addMemberBtn"
+            onclick="addMemberPrompt()"
+            style="display:none;"
+            class="btn btn-sm btn-outline-light"
+          >
+            + Member
+          </button>
         </div>
 
         <div class="messages" id="messages"></div>
