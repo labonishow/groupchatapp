@@ -507,10 +507,34 @@ function addMemberPrompt() {
         return;
     }
 
+    const availableUsers = allUsers.filter(function (user) {
+
+        if (String(user.id) === String(currentUserId)) {
+            return false;
+        }
+
+        const alreadyMember = currentGroup.members &&
+            currentGroup.members.some(function (member) {
+                return String(member.id) === String(user.id);
+            });
+
+        return !alreadyMember;
+    });
+
+    if (availableUsers.length === 0) {
+        alert("All users are already members of this group.");
+        return;
+    }
+
     let list = "Enter the ID of the user to add:\n";
 
-    for (let i = 0; i < allUsers.length; i++) {
-        list += allUsers[i].id + " - " + allUsers[i].name + "\n";
+    for (let i = 0; i < availableUsers.length; i++) {
+
+        list +=
+            availableUsers[i].id +
+            " - " +
+            availableUsers[i].name +
+            "\n";
     }
 
     const userId = prompt(list);
@@ -519,22 +543,37 @@ function addMemberPrompt() {
         return;
     }
 
-    axios.post("http://localhost:5000/api/groups/" + currentGroup.id + "/members", {
-        userId: Number(userId)
+    const selectedUser = availableUsers.find(function (user) {
+        return String(user.id) === String(userId);
+    });
+
+    if (!selectedUser) {
+        alert("Invalid user ID or user is already in the group.");
+        return;
+    }
+
+    axios.post(
+        "http://localhost:5000/api/groups/" +
+        currentGroup.id +
+        "/members",
+        {
+            userId: Number(userId)
+        }
+    )
+    .then(function () {
+
+        alert(selectedUser.name + " added to the group");
+
     })
+    .catch(function (error) {
 
-        .then(function () {
+        alert(
+            error.response
+                ? error.response.data.message
+                : "Could not add member"
+        );
 
-            alert("Member added");
-
-        })
-
-        .catch(function (error) {
-
-            alert(error.response ? error.response.data.message : "Could not add member");
-
-        });
-
+    });
 }
 
 function leaveCurrentGroup() {

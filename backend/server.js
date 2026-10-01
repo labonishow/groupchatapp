@@ -12,6 +12,7 @@ const userRoutes = require("./routes/userRoutes");
 const groupRoutes = require("./routes/groupRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
+const { startArchiveJob, archiveOldMessages } = require("./jobs/archiveMessages");
 
 const app = express();
 const server = http.createServer(app);
@@ -36,6 +37,10 @@ sequelize.sync()
             console.log(
                 `Server running on http://localhost:${process.env.PORT}`
             );
+
+            startArchiveJob();
+
+           // archiveOldMessages(); // remove after testing
         });
     })
     .catch((error) => {

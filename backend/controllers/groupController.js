@@ -55,7 +55,6 @@ const addMember = async (req, res) => {
                 message: "User not found",
             });
         }
-
         const alreadyMember = await group.hasMember(userId);
 
         if (alreadyMember) {
@@ -158,12 +157,17 @@ const leaveGroup = async (req, res) => {
 const getMyGroups = async (req, res) => {
     try {
         const user = await User.findByPk(req.userId, {
-            include: {
-                model: Group,
-                as: "groups",
-                attributes: ["id", "name"],
-            },
-        });
+    include: {
+        model: Group,
+        as: "groups",
+        attributes: ["id", "name"],
+        include: {
+            model: User,
+            as: "members",
+            attributes: ["id", "name"]
+        }
+    }
+});
 
         res.status(200).json(user.groups);
     } catch (error) {
