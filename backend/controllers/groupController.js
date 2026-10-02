@@ -30,13 +30,20 @@ const createGroup = async (req, res) => {
 
 const addMember = async (req, res) => {
     try {
-        const { userId } = req.body;
+
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                message: "Email is required"
+            });
+        }
 
         const group = await Group.findByPk(req.params.id);
 
         if (!group) {
             return res.status(404).json({
-                message: "Group not found",
+                message: "Group not found"
             });
         }
 
@@ -44,45 +51,58 @@ const addMember = async (req, res) => {
 
         if (!requesterIsMember) {
             return res.status(403).json({
-                message: "Only group members can add people",
+                message: "Only group members can add people"
             });
         }
 
-        const user = await User.findByPk(userId);
+        // Find user using email
+        const user = await User.findOne({
+            where: {
+                email: email.trim()
+            }
+        });
 
         if (!user) {
             return res.status(404).json({
-                message: "User not found",
+                message: "No user found with this email"
             });
         }
-        const alreadyMember = await group.hasMember(userId);
+
+        const alreadyMember = await group.hasMember(user.id);
 
         if (alreadyMember) {
             return res.status(400).json({
-                message: "User is already a member",
+                message: "User is already a member"
             });
         }
 
-        await group.addMember(userId);
+        // Add the user using the ID internally
+        await group.addMember(user.id);
 
-        // Get Socket.IO
         const io = req.app.get("io");
 
-        // Tell everyone in the group
-        io.to("group_" + group.id).emit("system-message", {
-            groupId: group.id,
-            text: user.name + " was added to the group"
-        });
+        if (io) {
+            io.to("group_" + group.id).emit("system-message", {
+                groupId: group.id,
+                text: user.name + " was added to the group"
+            });
+        }
 
         res.status(200).json({
             message: "Member added",
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email
+            }
         });
 
     } catch (error) {
-        console.error(error);
+
+        console.error("ADD MEMBER ERROR:", error);
 
         res.status(500).json({
-            message: "Server error",
+            message: "Server error"
         });
     }
 };

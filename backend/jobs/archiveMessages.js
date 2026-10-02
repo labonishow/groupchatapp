@@ -6,6 +6,7 @@ const Message = require("../models/Message");
 const ArchivedMessage = require("../models/Archivedmessage");
 const GroupMessage = require("../models/Groupmessage");
 const ArchivedGroupMessage = require("../models/Archivedgroupmessage");
+const { logToFile } = require("../utils/logger");
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -41,10 +42,12 @@ async function archivePrivateMessages(cutoff) {
         }
 
         await t.commit();
-        console.log(`Archived ${oldMessages.length} private messages`);
+        logToFile(`Archived ${oldMessages.length} private messages`);
+        
     } catch (error) {
         await t.rollback();
-        console.error("Error archiving private messages:", error.message);
+        logToFile(`ERROR archiving private messages: ${error.message}`);
+        
     }
 }
 
@@ -80,28 +83,27 @@ async function archiveGroupMessages(cutoff) {
         }
 
         await t.commit();
-        console.log(`Archived ${oldMessages.length} group messages`);
+         logToFile(`Archived ${oldMessages.length} group messages`);
     } catch (error) {
         await t.rollback();
-        console.error("Error archiving group messages:", error.message);
+        logToFile(`ERROR archiving group messages: ${error.message}`);
     }
 }
 
 async function archiveOldMessages() {
     const cutoff = new Date(Date.now() - ONE_DAY_MS);
 
-    console.log("Running message archive job, cutoff:", cutoff);
+    logToFile(`Archive job started, cutoff: ${cutoff.toISOString()}`);
 
     await archivePrivateMessages(cutoff);
     await archiveGroupMessages(cutoff);
+    logToFile("Archive job finished");
 }
 
 function startArchiveJob() {
-    // Runs every night at midnight ("0 0 * * *" = minute 0, hour 0, every day)
     const job = new CronJob("0 0 * * *", archiveOldMessages, null, true);
 
-    console.log("Message archive job scheduled for midnight every night");
-
+    logToFile("Message archive job scheduled to run every 24 hours");
     return job;
 }
 

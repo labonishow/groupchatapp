@@ -13,7 +13,7 @@ const groupRoutes = require("./routes/groupRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const { startArchiveJob, archiveOldMessages } = require("./jobs/archiveMessages");
-
+const aiRoutes = require("./routes/aiRoutes");
 const app = express();
 const server = http.createServer(app);
 
@@ -28,7 +28,7 @@ app.use("/api", userRoutes);
 app.use("/api", groupRoutes);
 app.use("/api", messageRoutes);
 app.use("/api/upload", uploadRoutes);
-
+app.use("/api/ai", aiRoutes);
 sequelize.sync()
     .then(() => {
         console.log("Database connected");
