@@ -14,15 +14,11 @@ function parseJwt(jwtToken) {
 }
 
 const currentUser = parseJwt(token);
-
 const currentUserId = currentUser ? currentUser.userId : null;
 
 const messageInput = document.getElementById("msgInput");
-
 const messagesEl = document.getElementById("messages");
-
 const chatListEl = document.getElementById("chatList");
-
 const groupListEl = document.getElementById("groupList");
 
 let roomName = null;
@@ -33,6 +29,7 @@ let myGroups = [];
 
 let selectionMode = false;
 let selectedUserIds = [];
+
 axios.defaults.headers.common["Authorization"] = "Bearer " + token;
 
 const socket = io("http://localhost:5000", {
@@ -49,12 +46,22 @@ socket.on("connect_error", function (error) {
   console.log("Connection failed:", error.message);
 });
 
+// ESCAPE HTML (use for ANY user-provided text put into innerHTML)
+
+function escapeHtml(text) {
+  return String(text === undefined || text === null ? "" : text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function formatTime(dateStr) {
   const d = new Date(dateStr);
 
   return d.toLocaleTimeString([], {
     hour: "2-digit",
-
     minute: "2-digit",
   });
 }
@@ -81,24 +88,26 @@ function renderMessage(msg) {
   let nameHtml = "";
 
   if (senderName && !isOwn) {
-    nameHtml = '<div class="sender-name">' + senderName + "</div>";
+    nameHtml = '<div class="sender-name">' + escapeHtml(senderName) + "</div>";
   }
+
   let contentHtml = "";
 
   if (msg.mediaUrl) {
     if (msg.mediaType && msg.mediaType.startsWith("image/")) {
-      contentHtml = '<img src="' + msg.mediaUrl + '" class="chat-image">';
+      contentHtml =
+        '<img src="' + escapeHtml(msg.mediaUrl) + '" class="chat-image">';
     } else {
       contentHtml =
         '<a href="' +
-        msg.mediaUrl +
-        '" target="_blank">' +
+        escapeHtml(msg.mediaUrl) +
+        '" target="_blank" rel="noopener noreferrer">' +
         "📎 " +
-        msg.fileName +
+        escapeHtml(msg.fileName) +
         "</a>";
     }
   } else {
-    contentHtml = "<div>" + msg.text + "</div>";
+    contentHtml = "<div>" + escapeHtml(msg.text) + "</div>";
   }
 
   message.innerHTML =
@@ -164,6 +173,7 @@ function getRoomId(emailA, emailB) {
 
   return emails[0] + "_" + emails[1];
 }
+
 // CLEAR ACTIVE STATE ON SIDEBAR
 
 function clearActiveItems() {
@@ -224,6 +234,7 @@ function loadPrivateHistory(roomName) {
       console.error("Error loading history:", error);
     });
 }
+
 // OPEN GROUP CHAT
 function openGroupChat(group) {
   roomName = null;
@@ -286,7 +297,8 @@ function renderGroupList() {
     item.className = "chat-item";
     item.id = "group-" + group.id;
 
-    item.innerHTML = '<div class="user-rectangle">' + group.name + "</div>";
+    item.innerHTML =
+      '<div class="user-rectangle">' + escapeHtml(group.name) + "</div>";
 
     item.onclick = function () {
       openGroupChat(group);
@@ -295,6 +307,7 @@ function renderGroupList() {
     groupListEl.appendChild(item);
   }
 }
+
 // LOAD MY GROUPS (persisted, survives a refresh)
 
 function loadGroups() {
@@ -460,12 +473,10 @@ function leaveCurrentGroup() {
 
       // Reset header
       document.getElementById("headerName").innerText = "Select a chat";
-
       document.getElementById("headerAvatar").innerText = "G";
 
       // Hide group buttons
       document.getElementById("addMemberBtn").style.display = "none";
-
       document.getElementById("leaveGroupBtn").style.display = "none";
 
       // Reload groups
@@ -483,13 +494,10 @@ function leaveCurrentGroup() {
 // AI SUGGESTIONS
 
 const aiInput = document.getElementById("aiInput");
-
 const getSuggestionsBtn = document.getElementById("getSuggestionsBtn");
-
 const suggestionsContainer = document.getElementById("suggestionsContainer");
-
 const toneSelect = document.getElementById("toneSelect");
-
+const modeSelect = document.getElementById("modeSelect"); // "reply" or "compose"
 const smartReplyChips = document.getElementById("smartReplyChips");
 
 // TABS
@@ -502,24 +510,25 @@ function showAITab() {
   document.getElementById("smartRepliesPanel").style.display = "none";
 }
 
-// GET AI SUGGESTIONS (manual button — "compose" mode)
+// GET AI SUGGESTIONS (manual button)
+// mode comes from the dropdown:
+//   "reply"   -> answers the text (e.g. "how are you?" -> "Good, you?")
+//   "compose" -> rewrites / improves the text
 
 async function getAISuggestions() {
   const text = aiInput.value.trim();
 
   if (!text) {
     alert("Write something first.");
-
     aiInput.focus();
-
     return;
   }
 
   const tone = toneSelect.value;
+  const mode = modeSelect ? modeSelect.value : "reply";
 
   // Disable button
   getSuggestionsBtn.disabled = true;
-
   getSuggestionsBtn.innerText = "Generating...";
 
   // Clear previous suggestions
@@ -532,7 +541,7 @@ async function getAISuggestions() {
       {
         text: text,
         tone: tone,
-        mode: "compose",
+        mode: mode,
       },
     );
 
@@ -549,11 +558,18 @@ async function getAISuggestions() {
   } catch (error) {
     console.error("AI suggestion error:", error);
 
+    let errorMessage = "Could not generate suggestions.";
+
+    if (error.response && error.response.status === 503) {
+      errorMessage = "AI is busy right now. Please try again in a moment.";
+    } else if (error.response && error.response.status === 429) {
+      errorMessage = "AI limit reached. Please try again later.";
+    }
+
     suggestionsContainer.innerHTML =
-      '<div class="ai-error">' + "Could not generate suggestions." + "</div>";
+      '<div class="ai-error">' + escapeHtml(errorMessage) + "</div>";
   } finally {
     getSuggestionsBtn.disabled = false;
-
     getSuggestionsBtn.innerText = "Get AI Suggestions";
   }
 }
@@ -626,16 +642,6 @@ function displayAISuggestions(suggestions, container, onPick) {
   }
 }
 
-// ESCAPE HTML
-
-function escapeHtml(text) {
-  const div = document.createElement("div");
-
-  div.textContent = text;
-
-  return div.innerHTML;
-}
-
 // BUTTON CLICK
 
 getSuggestionsBtn.addEventListener("click", function () {
@@ -651,6 +657,7 @@ aiInput.addEventListener("keydown", function (event) {
     getAISuggestions();
   }
 });
+
 // SEND MESSAGE
 function sendMessage() {
   const text = messageInput.value.trim();
@@ -677,6 +684,7 @@ function sendMessage() {
 
   messageInput.value = "";
 }
+
 // ENTER KEY
 messageInput.addEventListener("keydown", function (event) {
   if (event.key === "Enter") {
@@ -685,7 +693,9 @@ messageInput.addEventListener("keydown", function (event) {
   }
 });
 
+// FILE UPLOAD
 const fileInput = document.getElementById("fileInput");
+
 async function uploadFile() {
   const file = fileInput.files[0];
 
@@ -714,29 +724,25 @@ async function uploadFile() {
 
   fileInput.value = "";
 }
+
 function sendMediaMessage(mediaUrl, mediaType, fileName) {
   if (currentGroup) {
     socket.emit("group-message", {
       groupId: currentGroup.id,
-
       mediaUrl: mediaUrl,
-
       mediaType: mediaType,
-
       fileName: fileName,
     });
   } else if (roomName) {
     socket.emit("new-message", {
       roomName: roomName,
-
       mediaUrl: mediaUrl,
-
       mediaType: mediaType,
-
       fileName: fileName,
     });
   }
 }
+
 // RENDER USER LIST
 function renderUserList() {
   chatListEl.innerHTML = "";
@@ -761,7 +767,10 @@ function renderUserList() {
     }
 
     item.innerHTML =
-      checkboxHtml + '<div class="user-rectangle">' + user.name + "</div>";
+      checkboxHtml +
+      '<div class="user-rectangle">' +
+      escapeHtml(user.name) +
+      "</div>";
 
     if (selectionMode) {
       const checkbox = item.querySelector("input[type=checkbox]");
@@ -784,6 +793,7 @@ function renderUserList() {
     chatListEl.appendChild(item);
   }
 }
+
 // LOAD USERS
 
 function loadUsers() {
@@ -799,5 +809,6 @@ function loadUsers() {
       console.error("Error loading users:", error);
     });
 }
+
 loadUsers();
 loadGroups();

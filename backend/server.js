@@ -40,7 +40,7 @@ sequelize.sync()
 
             startArchiveJob();
 
-           // archiveOldMessages(); // remove after testing
+           archiveOldMessages(); // remove after testing
         });
     })
     .catch((error) => {

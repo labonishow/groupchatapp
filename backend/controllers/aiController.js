@@ -10,33 +10,29 @@ function sleep(ms) {
 
 function buildPrompt(text, tone, mode) {
     if (mode === "reply") {
-        return `
-You are an AI assistant inside a chat application.
+    return `
+You are a quick-reply generator inside a chat app, like Gmail Smart Reply.
 
-Someone just sent this message to the user:
+Message received:
 "${text}"
 
-Tone:
-${tone}
+Tone: ${tone}
 
-Generate exactly 3 short, natural quick-reply responses the user could send back.
+Write exactly 3 different replies the user could SEND BACK as an answer.
+Do NOT rephrase or repeat the received message. Do NOT ask the same question again.
+Each reply should be a different kind of answer (e.g. agree / delay or decline / ask to change plans).
 
 Rules:
-- Each reply must directly respond to the message above.
-- Keep each reply short (under 10 words).
-- Make them sound natural.
-- Do not explain anything.
-- Do not number them.
-- Return ONLY a JSON array.
-- Format:
+- Under 10 words each
+- Natural, like real chat messages
+- Return ONLY a JSON array of 3 strings
 
-[
-  "reply 1",
-  "reply 2",
-  "reply 3"
-]
+Examples:
+"Are you coming to the meeting?" -> ["Yes, I'll be there.", "Running late, will join soon.", "Can we reschedule?"]
+"What time should I expect you tomorrow?" -> ["Around 10 AM.", "Probably after lunch.", "I'll text you in the morning."]
+"Did you finish the report?" -> ["Yes, just sent it.", "Almost done, 30 more minutes.", "Not yet, need more time."]
 `;
-    }
+}
     return `
 You are an AI assistant inside a chat application.
 
