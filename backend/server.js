@@ -14,13 +14,19 @@ const messageRoutes = require("./routes/messageRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const { startArchiveJob, archiveOldMessages } = require("./jobs/archiveMessages");
 const aiRoutes = require("./routes/aiRoutes");
+const allowedOrigins = (
+    process.env.FRONTEND_URL || "http://127.0.0.1:5500,http://localhost:5500"
+)
+    .split(",")
+    .map((o) => o.trim().replace(/\/+$/, ""));
+
 const app = express();
 const server = http.createServer(app);
 
-const io = socketIo(server);
+const io = socketIo(server, allowedOrigins);
 app.set("io", io);
 
-app.use(cors());
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 app.use("/api", authRoutes);
@@ -33,9 +39,9 @@ sequelize.sync()
     .then(() => {
         console.log("Database connected");
 
-        server.listen(process.env.PORT, () => {
+        server.listen(process.env.PORT || 5000, () => {
             console.log(
-                `Server running on http://localhost:${process.env.PORT}`
+                `Server running on port ${process.env.PORT || 5000}`
             );
 
             startArchiveJob();

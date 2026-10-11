@@ -32,7 +32,7 @@ let selectedUserIds = [];
 
 axios.defaults.headers.common["Authorization"] = "Bearer " + token;
 
-const socket = io("http://localhost:5000", {
+const socket = io(API_URL+"", {
   auth: {
     token: token,
   },
@@ -220,7 +220,7 @@ function openChat(user) {
 
 function loadPrivateHistory(roomName) {
   axios
-    .get("http://localhost:5000/api/messages/" + roomName)
+    .get(API_URL+"/api/messages/" + roomName)
 
     .then(function (response) {
       const messages = response.data;
@@ -271,7 +271,7 @@ function openGroupChat(group) {
 
 function loadGroupHistory(groupId) {
   axios
-    .get("http://localhost:5000/api/groups/" + groupId + "/messages")
+    .get(API_URL+"/api/groups/" + groupId + "/messages")
 
     .then(function (response) {
       const messages = response.data;
@@ -312,7 +312,7 @@ function renderGroupList() {
 
 function loadGroups() {
   axios
-    .get("http://localhost:5000/api/groups")
+    .get(API_URL+"/api/groups")
 
     .then(function (response) {
       myGroups = response.data;
@@ -356,7 +356,7 @@ function confirmCreateGroup() {
   }
 
   axios
-    .post("http://localhost:5000/api/groups", {
+    .post(API_URL+"/api/groups", {
       name: groupName,
       memberIds: selectedUserIds,
     })
@@ -423,7 +423,7 @@ function addMemberPrompt() {
 
   axios
     .post(
-      "http://localhost:5000/api/groups/" + currentGroup.id + "/members",
+      API_URL+"/api/groups/" + currentGroup.id + "/members",
       {
         email: email.trim(),
       },
@@ -458,7 +458,7 @@ function leaveCurrentGroup() {
   }
 
   axios
-    .post("http://localhost:5000/api/groups/" + groupId + "/leave")
+    .post(API_URL+"/api/groups/" + groupId + "/leave")
     .then(function () {
       // Leave Socket.IO room
       socket.emit("leave-group", groupId);
@@ -537,7 +537,7 @@ async function getAISuggestions() {
 
   try {
     const response = await axios.post(
-      "http://localhost:5000/api/ai/suggestions",
+      API_URL+"/api/ai/suggestions",
       {
         text: text,
         tone: tone,
@@ -581,7 +581,7 @@ function fetchSmartReplies(incomingText) {
     '<div class="ai-loading">✨ Thinking of replies...</div>';
 
   axios
-    .post("http://localhost:5000/api/ai/suggestions", {
+    .post(API_URL+"/api/ai/suggestions", {
       text: incomingText,
       tone: toneSelect.value,
       mode: "reply",
@@ -709,7 +709,7 @@ async function uploadFile() {
 
   try {
     const response = await axios.post(
-      "http://localhost:5000/api/upload",
+      API_URL+"/api/upload",
       formData,
     );
 
@@ -798,7 +798,7 @@ function renderUserList() {
 
 function loadUsers() {
   axios
-    .get("http://localhost:5000/api/users")
+    .get(API_URL+"/api/users")
 
     .then(function (response) {
       allUsers = response.data;

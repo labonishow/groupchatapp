@@ -15,7 +15,7 @@ async function handleSignUpForm(event) {
 
   try {
     const response = await axios.post(
-      "http://localhost:5000/api/signup",
+      API_URL+"/api/signup",
       signupObj,
     );
 
